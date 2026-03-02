@@ -1,3 +1,66 @@
+server:
+  port: 8080
+
+jwt:
+  secret: 9d094b8e4ae83d8c451db5c0a280cbb094b730813235295285a5d951808abc00
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${spring.application.name}:${random.value}
+
 spring:
   application:
     name: ms-api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOriginPatterns:
+                  - "*"
+                allowedMethods:
+                  - "*"
+                allowedHeaders:
+                  - "*"
+          routes:
+            - id: users-service
+              uri: lb://ms-users
+              predicates:
+                - Path=/api/v1/users/**
+
+            - id: users-docs
+              uri: lb://ms-users
+              predicates:
+                - Path=/api/v1/users/v3/api-docs/**
+
+#            - id: restaurants-service
+#              uri: lb://ms-restaurants
+#              predicates:
+#                - Path=/api/v1/restaurants/**
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    urls:
+      - name: ms-users
+        url: /api/v1/users/v3/api-docs
+#      - name: ms-restaurants
+#        url: /api/v1/restaurants/v3/api-docs
+
+logging:
+  level:
+    com.pragma.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.security: DEBUG
+    reactor.netty.http.client: DEBUG
+    org.springframework.web.reactive: DEBUG
