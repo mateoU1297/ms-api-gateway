@@ -37,26 +37,10 @@ public class JwtAuthenticationFilter implements WebFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        String path = exchange.getRequest().getPath().toString();
-
-        if (path.contains("/auth/login") ||
-                path.contains("/swagger") ||
-                path.contains("/api-docs") ||
-                path.startsWith("/webjars") ||
-                path.contains("/users-docs") ||
-                path.contains("/restaurants-docs") ||
-                path.contains("/actuator/health")) {
-
-            log.debug("Ruta pública: {}, permitiendo acceso sin token", path);
-            return chain.filter(exchange);
-        }
-
         String token = extractToken(exchange.getRequest());
 
         if (token == null) {
-            log.warn("No se encontró token en la petición a: {}", path);
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
+            return chain.filter(exchange);
         }
 
         try {
@@ -70,10 +54,8 @@ public class JwtAuthenticationFilter implements WebFilter, Ordered {
             String rolesString = claims.get("roles", String.class);
 
             List<SimpleGrantedAuthority> authorities = Arrays.stream(rolesString.split(","))
-                    .map(role -> {
-                        String roleWithPrefix = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-                        return new SimpleGrantedAuthority(roleWithPrefix);
-                    })
+                    .map(role -> new SimpleGrantedAuthority(
+                            role.startsWith("ROLE_") ? role : "ROLE_" + role))
                     .collect(Collectors.toList());
 
             log.debug("Usuario autenticado: {} con roles: {}", email, authorities);

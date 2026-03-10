@@ -1,5 +1,6 @@
 package com.pragma.gateway.infrastructure.config.security;
 
+import com.pragma.gateway.exceptionhandler.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,18 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+
+    private static final String[] PUBLIC_PATHS = {
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/webjars/**",
+            "/v3/api-docs/**",
+            "/api/v1/users/auth/login",
+            "/api/v1/users/v3/api-docs/**",
+            "/api/v1/restaurants/v3/api-docs/**",
+            "/actuator/health"
+    };
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
@@ -30,24 +43,20 @@ public class SecurityConfig {
                             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                             return exchange.getResponse().setComplete();
                         })
+                        .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers(
-                                "/api/v1/users/auth/login",
-                                "/auth/login",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/webjars/**",
-                                "/v3/api-docs/**",
-                                "/api-docs/**",
-                                "/api/v1/users/v3/api-docs/**",
-                                "/actuator/health"
-                        ).permitAll()
+                        .pathMatchers(PUBLIC_PATHS).permitAll()
 
                         .pathMatchers("/api/v1/users/admin/**").hasRole("ADMIN")
                         .pathMatchers("/api/v1/users/owners/**").hasRole("OWNER")
                         .pathMatchers("/api/v1/users/employees/**").hasAnyRole("OWNER", "EMPLOYEE")
                         .pathMatchers("/api/v1/users/clients/**").hasRole("CLIENT")
+
+                        .pathMatchers("/api/v1/restaurants/admin/**").hasRole("ADMIN")
+                        .pathMatchers("/api/v1/restaurants/owner/**").hasRole("OWNER")
+                        .pathMatchers("/api/v1/restaurants/employees/**").hasAnyRole("OWNER", "EMPLOYEE")
+                        .pathMatchers("/api/v1/restaurants/clients/**").hasRole("CLIENT")
 
                         .anyExchange().authenticated()
                 )

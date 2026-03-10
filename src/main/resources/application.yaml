@@ -42,10 +42,15 @@ spring:
               predicates:
                 - Path=/api/v1/users/v3/api-docs/**
 
-#            - id: restaurants-service
-#              uri: lb://ms-restaurants
-#              predicates:
-#                - Path=/api/v1/restaurants/**
+            - id: restaurants-service
+              uri: lb://ms-restaurants
+              predicates:
+                - Path=/api/v1/restaurants/**
+
+            - id: restaurants-docs
+              uri: lb://ms-restaurants
+              predicates:
+                - Path=/api/v1/restaurants/v3/api-docs/**
 
 springdoc:
   swagger-ui:
@@ -54,8 +59,8 @@ springdoc:
     urls:
       - name: ms-users
         url: /api/v1/users/v3/api-docs
-#      - name: ms-restaurants
-#        url: /api/v1/restaurants/v3/api-docs
+      - name: ms-restaurants
+        url: /api/v1/restaurants/v3/api-docs
 
 logging:
   level:
