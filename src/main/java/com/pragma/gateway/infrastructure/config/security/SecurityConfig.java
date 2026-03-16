@@ -25,8 +25,12 @@ public class SecurityConfig {
             "/webjars/**",
             "/v3/api-docs/**",
             "/api/v1/users/auth/login",
+            "/api/v1/users/clients/register",
+            "/api/v1/restaurants/clients/restaurants",
+            "/api/v1/restaurants/clients/restaurants/{restaurantId}/dishes",
             "/api/v1/users/v3/api-docs/**",
             "/api/v1/restaurants/v3/api-docs/**",
+            "/api/v1/traceability/v3/api-docs/**",
             "/actuator/health"
     };
 
@@ -51,12 +55,14 @@ public class SecurityConfig {
                         .pathMatchers("/api/v1/users/admin/**").hasRole("ADMIN")
                         .pathMatchers("/api/v1/users/owners/**").hasRole("OWNER")
                         .pathMatchers("/api/v1/users/employees/**").hasAnyRole("OWNER", "EMPLOYEE")
-                        .pathMatchers("/api/v1/users/clients/**").hasRole("CLIENT")
 
                         .pathMatchers("/api/v1/restaurants/admin/**").hasRole("ADMIN")
                         .pathMatchers("/api/v1/restaurants/owner/**").hasRole("OWNER")
                         .pathMatchers("/api/v1/restaurants/employees/**").hasAnyRole("OWNER", "EMPLOYEE")
-                        .pathMatchers("/api/v1/restaurants/clients/**").hasRole("CLIENT")
+                        .pathMatchers("/api/v1/restaurants/clients/orders/**").hasRole("CLIENT")
+
+                        .pathMatchers("/api/v1/traceability/clients/orders/**").hasRole("CLIENT")
+                        .pathMatchers("/api/v1/traceability/owners/**").hasRole("OWNER")
 
                         .anyExchange().authenticated()
                 )
